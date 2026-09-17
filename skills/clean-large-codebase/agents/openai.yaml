@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Large Codebase"
+  short_description: "Audit and safely refactor oversized codebases"
+  default_prompt: "Use $clean-large-codebase to audit this repository and produce a behavior-preserving refactoring roadmap."
