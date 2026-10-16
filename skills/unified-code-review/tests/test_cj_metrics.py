@@ -93,6 +93,41 @@ class GitDeltaTests(unittest.TestCase):
         self.assertEqual(change["metric_delta_heuristic"]["decision_tokens_heuristic"], 1)
         self.assertEqual({f["status"] for f in report["files"]}, {"modified", "added", "deleted"})
 
+    def test_deleted_file_as_explicit_base_target(self):
+        deleted = self.root / "src" / "removed.cj"
+        deleted.unlink()
+        report = metrics.scan(deleted, base=self.base)
+        self.assertEqual(len(report["files"]), 1)
+        record = report["files"][0]
+        self.assertEqual(record["path"], "src/removed.cj")
+        self.assertEqual(record["status"], "deleted")
+        self.assertIsNone(record["current"])
+        self.assertEqual(record["baseline"]["functions"][0]["name"], "old")
+        self.assertEqual(report["delta"]["physical_lines"], -1)
+        self.assertFalse(deleted.exists())
+
+    def test_deleted_file_with_missing_parent_directory(self):
+        directory = self.root / "src" / "obsolete"
+        directory.mkdir()
+        deleted = directory / "removed.cj"
+        deleted.write_text("func archived() {}\n", encoding="utf-8")
+        self._git("add", ".")
+        self._git("commit", "-qm", "add obsolete file")
+        base = self._git("rev-parse", "HEAD").stdout.strip()
+        deleted.unlink()
+        directory.rmdir()
+        report = metrics.scan(deleted, base=base)
+        self.assertEqual([(f["path"], f["status"]) for f in report["files"]],
+                         [("src/obsolete/removed.cj", "deleted")])
+        self.assertEqual(report["delta"]["functions"], -1)
+        self.assertFalse(directory.exists())
+
+    def test_missing_file_still_fails_without_base(self):
+        missing = self.root / "src" / "removed.cj"
+        missing.unlink()
+        with self.assertRaises(FileNotFoundError):
+            metrics.scan(missing)
+
     def test_untracked_opt_in(self):
         (self.root / "src" / "u.cj").write_text("func new() { }\n", encoding="utf-8")
         r1 = metrics.scan(self.root, base=self.base)

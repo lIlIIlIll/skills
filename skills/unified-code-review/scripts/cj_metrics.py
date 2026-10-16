@@ -322,7 +322,11 @@ def git(repo: Path, *args: str, allowed_failure: bool = False) -> subprocess.Com
 
 
 def git_repo_root(path: Path) -> Path:
-    root = git(path if path.is_dir() else path.parent, "rev-parse", "--show-toplevel")
+    # In --base mode, the target (and its containing directories) may be deleted.
+    directory = path if path.is_dir() else path.parent
+    while not directory.exists() and directory != directory.parent:
+        directory = directory.parent
+    root = git(directory, "rev-parse", "--show-toplevel")
     return Path(os.fsdecode(root.stdout.strip())).resolve()
 
 
@@ -412,9 +416,13 @@ def changed_functions(files: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def scan(target: Path, base: str | None = None, include_untracked: bool = False, top: int = 15) -> dict[str, Any]:
     if target.is_symlink():
         raise ValueError("Refusing to scan a symlink target directly")
-    target = target.absolute().resolve(strict=True)
+    # A baseline comparison must accept a deleted .cj target. Without --base,
+    # retain strict path validation; missing directories are not file targets.
+    target = target.absolute().resolve(strict=base is None)
     if target.is_file() and target.suffix != ".cj":
         raise ValueError("Only .cj files can be directly scanned")
+    if base is not None and not target.exists() and target.suffix != ".cj":
+        raise ValueError("A missing target must be a .cj file in --base mode")
     base_commit: str | None = None
     head_commit: str | None = None
     if base is not None:
