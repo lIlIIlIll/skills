@@ -1,0 +1,13 @@
+{
+  "notes": "Example policy; advisory review triggers only, not CI failure thresholds. Override by repository conventions.",
+  "modes": ["pr", "style", "metrics", "deep", "architecture", "fix"],
+  "advisory_thresholds": {
+    "function_body_lines": 80,
+    "parameter_count_estimate": 5,
+    "brace_nesting_heuristic": 4,
+    "decision_tokens_heuristic": 12
+  },
+  "exclude_directories": [".git", ".cjpm", "build", "dist", "node_modules", "vendor", "target"],
+  "cangjie": {"treat_heuristic_metrics_as_gate": false},
+  "review": {"read_only_by_default": true, "require_trigger_and_impact": true, "require_source_verified_for_style": true}
+}
