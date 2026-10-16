@@ -1,0 +1,4 @@
+interface:
+  display_name: "Unified Code Review"
+  short_description: "Evidence-based PR, style, metrics and deep reviews"
+  default_prompt: "Use $unified-code-review to review the requested code for verified defects, maintainability concerns and metrics with clear evidence. Do not modify code unless explicitly asked."

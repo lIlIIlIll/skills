@@ -2,9 +2,20 @@
 
 Reusable Codex and agent skills maintained by [lIlIIlIll](https://github.com/lIlIIlIll).
 
-可复用的 Codex / Agent Skills。当前首个 Skill 专门用于大型代码库的可维护性审计与行为保持重构。
+可复用的 Codex / Agent Skills，涵盖代码审查、代码度量，以及大型代码库的可维护性审计和行为保持重构。
 
 ## Available skills
+
+### `unified-code-review`
+
+Evidence-first code review across correctness, security, style, cleanup, maintainability, architecture, tests, and reproducible metrics. It supports `pr`, `style`, `metrics`, `deep`, `architecture`, and explicitly authorized `fix` modes. Review modes are read-only by default.
+
+- Separate confirmed defects, maintainability issues, metrics-only hotspots, and unverified leads.
+- Respect repository conventions, compiler/formatter results, and existing API contracts rather than enforcing generic preferences.
+- Use optional language-native metrics tools. A bundled Cangjie (`.cj`) scanner reports line counts and **heuristic** function/branch/nesting estimates, **not** formal cyclomatic or cognitive complexity.
+- Keep measurements reproducible and distinguish inventory coverage from semantic review coverage.
+
+See [SKILL.md](skills/unified-code-review/SKILL.md) and [Cangjie scanner notes](skills/unified-code-review/references/cangjie.md).
 
 ### `clean-large-codebase`
 
@@ -26,6 +37,7 @@ Project-local Codex installation:
 
 ```bash
 mkdir -p .agents/skills
+cp -R skills/unified-code-review .agents/skills/
 cp -R skills/clean-large-codebase .agents/skills/
 ```
 
@@ -33,12 +45,19 @@ User-level installation:
 
 ```bash
 mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills"
+cp -R skills/unified-code-review "${CODEX_HOME:-$HOME/.codex}/skills/"
 cp -R skills/clean-large-codebase "${CODEX_HOME:-$HOME/.codex}/skills/"
 ```
 
-Then invoke it as `$clean-large-codebase` or let Codex select it for a matching request.
+Invoke either as `$unified-code-review` / `$clean-large-codebase`, or let Codex select the matching skill automatically.
 
-## Example
+## Examples
+
+```text
+Use $unified-code-review in pr mode. Review the current branch against main
+for confirmed defects, code-style issues and metric regressions. Read-only;
+state verification evidence and tool limitations.
+```
 
 ```text
 Use $clean-large-codebase in audit mode.
@@ -52,6 +71,7 @@ Write an evidence-backed audit and a reviewable refactoring roadmap.
 ```bash
 python scripts/validate_skills.py
 python -m unittest discover -s tests -v
+python -m unittest discover -s skills/unified-code-review/tests -v
 ```
 
 The validation workflow runs on every push and pull request.
