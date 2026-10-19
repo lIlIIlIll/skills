@@ -19,5 +19,5 @@
 ## Review 反馈处理与收敛
 
 - 将审查意见按同根因分组，批量修复并更新覆盖正反和边界的 fixture/test，而不是“一条评论一次推送”。
-- 变更 skill 时运行 `python scripts/validate_skills.py`、`python -m unittest discover -s tests -v`，可用时补充上游 `quick_validate.py`。实测结果须对应提交，未运行则注明。
+- 按本文件现有的验证条款运行相应检查；在 Review 反馈中逐项说明实际运行结果、缺失证据与对应提交。不可将未执行或不可用的检查描述成通过，避免在多处重复维护测试命令。
 - 合并判断依赖真实阻塞缺陷、验收和最新 HEAD 的 CI/Review 证据，不能把 Codex Thread 数量清零或轮数上限作为唯一标准。`AGENTS.md` 不会替代仓库 Review Trigger 配置。
